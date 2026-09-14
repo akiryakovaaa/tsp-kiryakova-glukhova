@@ -28,5 +28,8 @@
 * **Внутренний сервис (gRPC Service):** Выполняет вычислительную задачу по подбору рекомендаций. Взаимодействует с API Service по RPC (Protocol Buffers).
 * **Асинхронные уведомления:** RabbitMQ выступает брокером сообщений для передачи событий от API Service. Notification Service (Socket Service) принимает эти сообщения и доставляет их клиентам по WebSocket.
 * **Развертывание:** Docker и Docker Compose для контейнеризации всех узлов.
+<img width="1774" height="1296" alt="image" src="https://github.com/user-attachments/assets/eaa024ab-b574-453f-8fa5-18d547b4da4b" />
+
 
 **5. Структура базы данных**
+<img width="1898" height="1736" alt="image" src="https://github.com/user-attachments/assets/4a926741-cb03-4104-a2de-873674b1cf9a" />
