@@ -54,4 +54,4 @@
 *   Сущность **Tag (Тег)** используется для категоризации и поиска кулинарных статей.
 
 **Физическая схема:**
-<img width="900" height="823" alt="image" src="https://github.com/user-attachments/assets/4a926741-cb03-4104-a2de-873674b1cf9a" />
+<img width="2430" height="1348" alt="image" src="https://github.com/user-attachments/assets/da0f0242-ec25-4ff8-92a2-6fba32c751cf" />
