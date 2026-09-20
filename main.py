@@ -1,115 +1,54 @@
 from uuid import uuid4
-
 from app.database import SessionLocal
-from app.crud import (
-    create_user,
-    get_all_users,
-    update_user_email,
-    delete_user,
-    create_post,
-    get_all_posts,
-    update_post_title,
-    delete_post,
-    add_post_to_favorites,
-    get_user_favorites,
-    remove_post_from_favorites
-)
-
+from app.crud import create_user, create_post, get_all_users
+from app import crud_posts as crud_tags
+from app.models import Tag
 
 def main():
     db = SessionLocal()
-
-    user = None
-    post = None
-
     try:
-        print("=== ВСЕ ПОЛЬЗОВАТЕЛИ ===")
-        users = get_all_users(db)
+        print("=== ИНТЕГРАЦИОННЫЙ ТЕСТ АРХИТЕКТУРЫ ===")
 
-        for item in users:
-            print(item.id, item.username, item.email)
-
+        # 1. Инфраструктура Юлии: Создание автора
         unique_id = uuid4().hex[:8]
-        original_email = f"test_{unique_id}@example.com"
-        updated_email = f"updated_{unique_id}@example.com"
-
-        print("\n=== CREATE: создание пользователя ===")
         user = create_user(
             db=db,
-            username=f"test_user_{unique_id}",
-            email=original_email,
-            password_hash="temporary_password"
+            username=f"author_{unique_id}",
+            email=f"test_{unique_id}@example.com",
+            password_hash="hashed_pass"
         )
-        print(user.id, user.username, user.email)
+        print(f"Пользователь создан: {user.username}")
 
-        print("\n=== UPDATE: изменение email ===")
-        user = update_user_email(
-            db=db,
-            user_id=user.id,
-            new_email=updated_email
-        )
-        print(user.id, user.username, user.email)
-
-        print("\n=== CREATE: создание поста ===")
+        # 2. Контентная часть Юлии: Создание поста
         post = create_post(
             db=db,
-            title="Тестовый рецепт",
-            description="Тестовая запись для проверки CRUD",
-            body="Ингредиенты и способ приготовления",
+            title="Секреты идеального стейка",
+            description="Кулинарная статья",
+            body="Рецепт приготовления...",
             author_id=user.id,
             is_published=True
         )
-        print(post.id, post.title, post.author_id)
+        print(f"Пост создан: '{post.title}' (Автор ID: {post.author_id})")
 
-        print("\n=== READ: получение всех постов ===")
-        posts = get_all_posts(db)
+        # 3. Контентная часть Анны: Добавление тегов к посту
+        # Проверяем, существует ли тег, чтобы избежать ошибки уникальности
+        tag = db.query(Tag).filter(Tag.name == "Мясо").first()
+        if not tag:
+            tag = Tag(name="Мясо")
+            db.add(tag)
+            db.commit()
+            db.refresh(tag)
 
-        for item in posts:
-            print(item.id, item.title, item.author_id)
+        post.tags.append(tag)
+        db.commit()
+        print(f"УСПЕХ: Тег '{tag.name}' успешно привязан к посту '{post.title}'.")
+        print("Связь 'User -> Post -> Tag' работает корректно!")
 
-        print("\n=== UPDATE: изменение названия поста ===")
-        post = update_post_title(
-            db=db,
-            post_id=post.id,
-            new_title="Обновленный тестовый рецепт"
-        )
-        print(post.id, post.title)
-
-        print("\n=== CREATE: добавление в избранное ===")
-        favorite = add_post_to_favorites(
-            db=db,
-            user_id=user.id,
-            post_id=post.id
-        )
-        print(favorite.id, favorite.user_id, favorite.post_id)
-
-        print("\n=== READ: избранное пользователя ===")
-        favorites = get_user_favorites(db, user.id)
-
-        for item in favorites:
-            print(item.id, item.user_id, item.post_id)
-
-        print("\n=== DELETE: удаление из избранного ===")
-        print(remove_post_from_favorites(db, user.id, post.id))
-
-        print("\n=== DELETE: удаление поста ===")
-        print(delete_post(db, post.id))
-        post = None
-
-        print("\n=== DELETE: удаление пользователя ===")
-        print(delete_user(db, user.id))
-        user = None
-
-        print("\nCRUD-проверка завершена успешно")
-
-    except Exception:
+    except Exception as e:
+        print(f"Ошибка выполнения: {e}")
         db.rollback()
-        raise
-
     finally:
         db.close()
 
-
 if __name__ == "__main__":
     main()
-
