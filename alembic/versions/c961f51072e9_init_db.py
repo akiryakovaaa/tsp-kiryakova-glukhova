@@ -44,7 +44,7 @@ def upgrade() -> None:
     sa.Column('title', sa.String(length=255), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('body', sa.Text(), nullable=False),
-    sa.Column('post_type', sa.Enum('recipe', 'article', name='posttype'), nullable=False),
+    sa.Column('post_type', sa.Enum('recipe', 'news', name='posttype'), nullable=False),
     sa.Column('author_id', sa.Integer(), nullable=False),
     sa.Column('is_published', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
