@@ -1,5 +1,6 @@
-from seed import SessionLocal
-import crud
+from app.seed_posts import SessionLocal
+from app import crud_posts as crud
+
 
 def run_tests():
     """Выполняет сценарии тестирования CRUD-операций и выводит результаты в консоль."""
@@ -9,7 +10,7 @@ def run_tests():
         posts = crud.get_all_posts(db)
 
         if not posts:
-            print("База данных пуста. Сначала запустите скрипт seed.py!")
+            print("База данных пуста. Сначала запустите скрипт seed_posts.py!")
             return
 
         for post in posts:

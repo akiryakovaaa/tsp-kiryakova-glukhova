@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from models import Tag, Post, PostType
+from app.models_posts import Tag, Post, PostType
 
 # CRUD для Тегов
 def create_tag(db: Session, name: str):

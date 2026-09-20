@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
-from models import Base, PostType
-import crud
+from models_posts import Base, PostType
+import crud_posts
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_app.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})

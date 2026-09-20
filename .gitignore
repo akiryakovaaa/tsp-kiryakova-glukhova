@@ -1,0 +1,16 @@
+# Базы данных
+*.db
+*.sqlite3
+
+# Виртуальное окружение
+.venv/
+venv/
+env/
+
+# Кэш Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Настройки среды разработки (PyCharm)
+.idea/
