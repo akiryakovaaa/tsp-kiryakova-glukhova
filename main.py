@@ -1,15 +1,14 @@
 from uuid import uuid4
 from app.database import SessionLocal
-from app.crud import create_user, create_post, get_all_users
-from app import crud_posts as crud_tags
-from app.models import Tag
+from app.crud import create_user, create_post, get_tag_by_name, create_tag
+
 
 def main():
     db = SessionLocal()
     try:
         print("=== ИНТЕГРАЦИОННЫЙ ТЕСТ АРХИТЕКТУРЫ ===")
 
-        # 1. Инфраструктура Юлии: Создание автора
+        # 1. Создание автора (Архитектура Юлии)
         unique_id = uuid4().hex[:8]
         user = create_user(
             db=db,
@@ -19,28 +18,26 @@ def main():
         )
         print(f"Пользователь создан: {user.username}")
 
-        # 2. Контентная часть Юлии: Создание поста
+        # 2. Обработка тега через единый CRUD-слой
+        tag_name = "Мясо"
+        tag = get_tag_by_name(db=db, name=tag_name)
+        if not tag:
+            tag = create_tag(db=db, name=tag_name)
+
+        print(f"Тег готов к привязке: '{tag.name}'")
+
+        # 3. Создание поста и автоматическая привязка тега (Слияние архитектур)
         post = create_post(
             db=db,
             title="Секреты идеального стейка",
             description="Кулинарная статья",
             body="Рецепт приготовления...",
             author_id=user.id,
-            is_published=True
+            is_published=True,
+            tag_ids=[tag.id] if tag else None
         )
+
         print(f"Пост создан: '{post.title}' (Автор ID: {post.author_id})")
-
-        # 3. Контентная часть Анны: Добавление тегов к посту
-        # Проверяем, существует ли тег, чтобы избежать ошибки уникальности
-        tag = db.query(Tag).filter(Tag.name == "Мясо").first()
-        if not tag:
-            tag = Tag(name="Мясо")
-            db.add(tag)
-            db.commit()
-            db.refresh(tag)
-
-        post.tags.append(tag)
-        db.commit()
         print(f"УСПЕХ: Тег '{tag.name}' успешно привязан к посту '{post.title}'.")
         print("Связь 'User -> Post -> Tag' работает корректно!")
 
@@ -49,6 +46,7 @@ def main():
         db.rollback()
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     main()

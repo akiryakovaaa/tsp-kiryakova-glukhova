@@ -9,7 +9,8 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Enum,
-    UniqueConstraint
+    UniqueConstraint,
+    Table
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -25,6 +26,15 @@ class UserRole(enum.Enum):
 class PostType(enum.Enum):
     recipe = "recipe"
     article = "article"
+
+
+# Промежуточная таблица ДОЛЖНА объявляться до классов, которые её используют
+post_tags = Table(
+    "post_tags",
+    Base.metadata,
+    Column("post_id", Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True)
+)
 
 
 class User(Base):
@@ -54,6 +64,7 @@ class Post(Base):
     updated_at = Column(DateTime, nullable=True, onupdate=func.now())
 
     favorites = relationship("Favorite", back_populates="post")
+    tags = relationship("Tag", secondary=post_tags, back_populates="posts")
 
 
 class Favorite(Base):
@@ -71,3 +82,11 @@ class Favorite(Base):
         UniqueConstraint("user_id", "post_id", name="unique_user_favorite"),
     )
 
+
+class Tag(Base):
+    __tablename__ = "tags"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(50), nullable=False, unique=True)
+
+    posts = relationship("Post", secondary=post_tags, back_populates="tags")
