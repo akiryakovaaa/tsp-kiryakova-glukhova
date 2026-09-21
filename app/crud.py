@@ -73,6 +73,14 @@ def create_post(db: Session, title: str, body: str, author_id: int,
                 post_type: PostType = PostType.recipe, description: str = None,
                 is_published: bool = False, tag_ids: list[int] = None):
 
+    # проверяем права пользователя
+    user = get_user_by_id(db, author_id)
+    if not user:
+        raise ValueError("Ошибка: Пользователь с таким ID не найден")
+
+    if user.role != UserRole.admin:
+        raise PermissionError("Отказано в доступе: Только администраторы могут создавать публикации")
+
     # создаем новую публикацию и привязываем к ней теги
     new_post = Post(title = title, description = description, body = body, author_id = author_id,
                     post_type = post_type, is_published = is_published)
