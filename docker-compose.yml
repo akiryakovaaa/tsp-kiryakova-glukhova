@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: anna
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: Culinary_news_portal
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://anna:1234@db:5432/Culinary_news_portal
+
+volumes:
+  postgres_data:

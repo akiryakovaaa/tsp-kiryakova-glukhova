@@ -1,8 +1,17 @@
 from uuid import uuid4 # генерация уникального ID запроса (Request-ID)
+from fastapi import FastAPI
 
 from app.database import SessionLocal
 from app.crud import create_user, create_post, get_tag_by_name, create_tag, add_post_to_favorites
 from app.models import UserRole
+
+# создаем экземпляр веб-приложения для сервера Uvicorn
+app = FastAPI(title="Culinary News Portal")
+
+# базовый маршрут, чтобы было что проверить в браузере
+@app.get("/")
+def read_root():
+    return {"status": "ok", "message": "Проект успешно запущен в Docker!"}
 
 def main():
     db = SessionLocal()
