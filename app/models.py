@@ -1,4 +1,4 @@
-import enum # создание фиксированных списков (перечислений)
+import enum
 
 from sqlalchemy import (
     Column,
@@ -12,7 +12,7 @@ from sqlalchemy import (
     Table
 )
 from sqlalchemy.orm import relationship # связи между таблицами (М:М, 1:1)
-from sqlalchemy.sql import func # функции бд
+from sqlalchemy.sql import func # postgreSQL фиксирует время
 
 from app.database import Base
 
@@ -34,7 +34,7 @@ post_tags = Table(
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     username = Column(String(100), nullable=False)
     email = Column(String(255), nullable=False, unique=True)
     password_hash = Column(String(255), nullable=False)
@@ -45,7 +45,7 @@ class User(Base):
 
 class Post(Base):
     __tablename__ = "posts"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     body = Column(Text, nullable=False)
@@ -60,16 +60,17 @@ class Post(Base):
 
 class Favorite(Base):
     __tablename__ = "favorites"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
+
     user = relationship("User", back_populates="favorites")
     post = relationship("Post", back_populates="favorites")
 
 class Tag(Base):
     __tablename__ = "tags"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False, unique=True)
 
     posts = relationship("Post", secondary=post_tags, back_populates="tags")

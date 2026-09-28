@@ -1,6 +1,6 @@
 import os
-from sqlalchemy import create_engine # создание подключения к бд
-from sqlalchemy.orm import sessionmaker, declarative_base # инструменты ORM: фабрику сессий и базовый класс для моделей
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base # инструменты ORM: создание сессий и базовый класс для таблиц
 
 SQLALCHEMY_DATABASE_URL = os.getenv(
     "DATABASE_URL",
@@ -15,4 +15,4 @@ SessionLocal = sessionmaker(
     bind=engine # привязка к движку
 )
 
-Base = declarative_base() # базовый класс для всех моделей (таблиц) базы данных
+Base = declarative_base()

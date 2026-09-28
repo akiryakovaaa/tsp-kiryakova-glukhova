@@ -74,7 +74,7 @@ def main():
         except PermissionError as pe:
             print(f"Попытка создания поста заблокирована. Причина: {pe}")
 
-        add_post_to_favorites(db, reader.id, post.id)
+        fav = add_post_to_favorites(db, reader.id, post.id)
         print(f"Читатель '{reader.username}' смог добавить пост '{post.title}' в избранное. ID закладки: {fav.id}")
 
     except Exception as e:
