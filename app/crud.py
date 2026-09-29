@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError # ошибка нарушения ограничений
+from sqlalchemy.exc import IntegrityError # ошибка - нарушения ограничений бд
 
 from app.models import User, Post, Favorite, Tag, UserRole, PostType
 
@@ -79,7 +79,7 @@ def create_post(db: Session, title: str, body: str, author_id: int,
         raise ValueError("Ошибка: Пользователь с таким ID не найден")
 
     if user.role != UserRole.admin:
-        raise PermissionError("Отказано в доступе: Только администраторы могут создавать публикации")
+        raise PermissionError("Отказано в доступе: Только администраторы могут создавать публикации") # контроль доступа
 
     # создаем новую публикацию и привязываем к ней теги
     new_post = Post(title = title, description = description, body = body, author_id = author_id,
