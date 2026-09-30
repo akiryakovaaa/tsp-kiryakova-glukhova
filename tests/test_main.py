@@ -1,6 +1,6 @@
-import subprocess
+import subprocess  # запуск внешних процессов
 from uuid import uuid4
-from fastapi.testclient import TestClient
+from fastapi.testclient import TestClient  # клиент для отправки тестовых HTTP-запросов
 
 from main import app
 from app.database import SessionLocal
