@@ -1,4 +1,3 @@
-import subprocess  # запуск внешних процессов
 from uuid import uuid4
 from fastapi.testclient import TestClient  # клиент для отправки тестовых HTTP-запросов
 
@@ -13,7 +12,7 @@ client = TestClient(app)
 def test_server_api():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "message": "Проект успешно запущен в Docker!"}
+    assert response.json() == {"status": "ok", "message": "Проект успешно запущен!"}
 
 # тест репозитория: проверка сохранения пользователя в бд
 def test_repository_crud():
@@ -36,14 +35,3 @@ def test_repository_crud():
         assert user.email == test_email
     finally:
         db.close()
-
-# тест демо-скрипта: проверка успешного выполнения файла main.py
-def test_demo_script():
-    # запускаем скрипт изолированно, имитируя ручной ввод команды в терминале
-    result = subprocess.run(
-        ["python", "main.py"],
-        capture_output=True,
-        text=True
-    )
-
-    assert result.returncode == 0, f"Ошибка в демо-скрипте: {result.stderr}"

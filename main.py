@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from uuid import uuid4 # генерация уникального ID запроса
 
+from app.database import init_db
 from app.database import SessionLocal
 from app.crud import create_user, create_post, get_tag_by_name, create_tag, add_post_to_favorites
 from app.models import UserRole
@@ -8,9 +9,12 @@ from app.models import UserRole
 # создаем экземпляр FastAPI для работы сервера и тестов
 app = FastAPI()
 
+# вызываем создание таблиц при старте приложения
+init_db()
+
 @app.get("/")
 def root():
-    return {"status": "ok", "message": "Проект успешно запущен в Docker!"}
+    return {"status": "ok", "message": "Проект успешно запущен!"}
 
 def main():
     db = SessionLocal()
