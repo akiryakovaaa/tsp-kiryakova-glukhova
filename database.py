@@ -16,6 +16,5 @@ class Base(DeclarativeBase):
 
 # автоматическое создание всех таблиц в базе данных
 def init_db():
-    from app import models
     # импортируем модели, чтобы SQLAlchemy узнала об их структуре
     Base.metadata.create_all(bind=engine)

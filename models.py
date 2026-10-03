@@ -17,7 +17,7 @@ from sqlalchemy.sql import func # фиксация времени серверо
 from typing import List, Optional # List для множественных связей, Optional для полей, допускающих NULL
 from datetime import datetime # тип данных для хранения даты и времени
 
-from app.database import Base
+from database import Base
 
 class UserRole(enum.Enum):
     user = "user"
