@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError # ошибка - нарушения ограничений бд
 from sqlalchemy import select
 
-from app.models import User, Post, Favorite, Tag, UserRole, PostType
+from models import User, Post, Favorite, Tag, UserRole, PostType
 
 # CRUD для users
 def create_user(db: Session, username: str, email: str,

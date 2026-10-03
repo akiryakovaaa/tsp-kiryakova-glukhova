@@ -1,6 +1,6 @@
-from app.database import SessionLocal
-from app.crud import create_user, create_post, create_tag, get_tag_by_name, add_post_to_favorites
-from app.models import User, Post, PostType, UserRole
+from database import SessionLocal
+from crud import create_user, create_post, create_tag, get_tag_by_name, add_post_to_favorites
+from models import User, Post, PostType, UserRole
 
 def seed_data():
     db = SessionLocal()
