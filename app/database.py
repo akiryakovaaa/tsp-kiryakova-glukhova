@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base # инструменты ORM: создание сессий и базовый класс для таблиц
+from sqlalchemy.orm import sessionmaker, DeclarativeBase # инструменты ORM: создание сессий и базовый класс для таблиц
 
 SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://anna@localhost:5432/Culinary_news_portal"
 
@@ -11,7 +11,8 @@ SessionLocal = sessionmaker(
     bind=engine # привязка к движку
 )
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
 # автоматическое создание всех таблиц в базе данных
 def init_db():

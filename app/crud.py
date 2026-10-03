@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError # ошибка - нарушения ограничений бд
+from sqlalchemy import select
 
 from app.models import User, Post, Favorite, Tag, UserRole, PostType
 
@@ -14,10 +15,10 @@ def create_user(db: Session, username: str, email: str,
     return user
 
 def get_user_by_id(db: Session, user_id: int): # -> user | none
-    return db.query(User).filter(User.id == user_id).first() # строки, где id совпадает с переданным
+    return db.get(User, user_id)# строки, где id совпадает с переданным
 
 def get_all_users(db: Session): # -> list[user]
-    return db.query(User).order_by(User.id).all() # список всех пользователей, отсортированных по ID
+    return db.scalars(select(User).order_by(User.id)).all() # список всех пользователей, отсортированных по ID
 
 def update_user_email(db: Session, user_id: int, new_email: str): # -> user | none
     user = get_user_by_id(db, user_id)
@@ -52,13 +53,13 @@ def create_tag(db: Session, name: str): # -> tag
         return None
 
 def get_tag_by_id(db: Session, tag_id: int): # -> tag | none
-    return db.query(Tag).filter(Tag.id == tag_id).first()
+    return db.get(Tag, tag_id)
 
 def get_tag_by_name(db: Session, name: str): # -> tag | none
-    return db.query(Tag).filter(Tag.name == name).first()
+    return db.scalar(select(Tag).where(Tag.name == name))
 
 def get_all_tags(db: Session): # -> list[Tag]
-    return db.query(Tag).all()
+    return db.scalars(select(Tag)).all()
 
 def delete_tag(db: Session, tag_id: int) -> bool:
     tag = get_tag_by_id(db, tag_id)
@@ -87,8 +88,8 @@ def create_post(db: Session, title: str, body: str, author_id: int,
 
     # обработка связи М:М с тегами
     if tag_ids:
-        tags = db.query(Tag).filter(Tag.id.in_(tag_ids)).all() # находим теги, чьи id есть в списке
-        new_post.tags.extend(tags) # привязываем найденные теги к посту
+        tags = db.scalars(select(Tag).where(Tag.id.in_(tag_ids))).all()
+        new_post.tags.extend(tags)
 
     try:
         db.add(new_post)
@@ -101,13 +102,13 @@ def create_post(db: Session, title: str, body: str, author_id: int,
         return None
 
 def get_post_by_id(db: Session, post_id: int): # -> post | none
-    return db.query(Post).filter(Post.id == post_id).first()
+    return db.get(Post, post_id)
 
 def get_all_posts(db: Session): # -> list[post]
-    return db.query(Post).order_by(Post.id).all()
+    return db.scalars(select(Post).order_by(Post.id)).all()
 
 def get_published_posts(db: Session): # -> list[post]
-    return db.query(Post).filter(Post.is_published.is_(True)).order_by(Post.id).all()
+    return db.scalars(select(Post).where(Post.is_published.is_(True)).order_by(Post.id)).all()
 
 def update_post_title(db: Session, post_id: int, new_title: str): # -> post | none
     post = get_post_by_id(db, post_id)
@@ -140,8 +141,9 @@ def delete_post(db: Session, post_id: int) -> bool:
 # CRUD для favorites
 def add_post_to_favorites(db: Session, user_id: int, post_id: int):
     # добавлен ли уже этот пост в избранное у данного пользователя
-    existing_favorite = db.query(Favorite).filter(Favorite.user_id == user_id,
-                                                  Favorite.post_id == post_id).first()
+    existing_favorite = db.scalar(
+        select(Favorite).where(Favorite.user_id == user_id, Favorite.post_id == post_id)
+    )
 
     if existing_favorite is not None:
         return existing_favorite
@@ -155,18 +157,19 @@ def add_post_to_favorites(db: Session, user_id: int, post_id: int):
     return favorite
 
 def get_favorite_by_id(db: Session, favorite_id: int): # -> favorite | none
-    return db.query(Favorite).filter(Favorite.id == favorite_id).first()
+    return db.get(Favorite, favorite_id)
 
 def get_user_favorites(db: Session, user_id: int): # -> list[favorite]
-    return db.query(Favorite).filter(Favorite.user_id == user_id).order_by(Favorite.id).all()
+    return db.scalars(select(Favorite).where(Favorite.user_id == user_id).order_by(Favorite.id)).all()
 
 # все записи добавлений в избранное для конкретного поста по его post_id
 def get_post_favorites(db: Session, post_id: int): # -> list[favorite]
-    return db.query(Favorite).filter(Favorite.post_id == post_id).order_by(Favorite.id).all()
+    return db.scalars(select(Favorite).where(Favorite.post_id == post_id).order_by(Favorite.id)).all()
 
 def remove_post_from_favorites(db: Session, user_id: int, post_id: int) -> bool:
-    favorite = db.query(Favorite).filter(Favorite.user_id == user_id,
-                                         Favorite.post_id == post_id).first()
+    favorite = db.scalar(
+        select(Favorite).where(Favorite.user_id == user_id, Favorite.post_id == post_id)
+    )
 
     if favorite is None:
         return False
