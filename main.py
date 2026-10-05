@@ -28,7 +28,7 @@ def main():
         tag_name = "Мясо"
         tag = get_tag_by_name(db=db, name=tag_name)
         if not tag:
-            tag = create_tag(db=db, name=tag_name)
+            tag = create_tag(db=db, name=tag_name, author_id=user.id)
 
         print(f"Тег готов к привязке: '{tag.name}'")
 

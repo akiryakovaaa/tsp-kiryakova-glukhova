@@ -27,7 +27,7 @@ def seed_data():
         for t_name in tags_to_create:
             tag = get_tag_by_name(db, t_name)
             if not tag:
-                tag = create_tag(db, t_name)
+                tag = create_tag(db, t_name, author_id=user_anna.id)
             tag_objects[t_name] = tag
         print("Кулинарные теги инициализированы")
 

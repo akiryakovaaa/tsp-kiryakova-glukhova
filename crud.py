@@ -20,7 +20,15 @@ def get_user_by_id(db: Session, user_id: int): # -> user | none
 def get_all_users(db: Session): # -> list[user]
     return db.scalars(select(User).order_by(User.id)).all() # список всех пользователей, отсортированных по ID
 
-def update_user_email(db: Session, user_id: int, new_email: str): # -> user | none
+def update_user_email(db: Session, user_id: int, new_email: str, author_id: int): # -> user | none
+    # проверяем права пользователя
+    current_user = get_user_by_id(db, author_id)
+    if not current_user:
+        raise ValueError("Ошибка: Пользователь с таким ID не найден")
+
+    if current_user.role != UserRole.admin and current_user.id != user_id:
+        raise PermissionError("Отказано в доступе: Можно изменять только свой аккаунт")  # контроль доступа
+
     user = get_user_by_id(db, user_id)
     if user is None:
         return None
@@ -30,7 +38,15 @@ def update_user_email(db: Session, user_id: int, new_email: str): # -> user | no
     db.refresh(user)
     return user
 
-def delete_user(db: Session, user_id: int) -> bool:
+def delete_user(db: Session, user_id: int, author_id: int) -> bool:
+    # проверяем права пользователя
+    current_user = get_user_by_id(db, author_id)
+    if not current_user:
+        raise ValueError("Ошибка: Пользователь с таким ID не найден")
+
+    if current_user.role != UserRole.admin and current_user.id != user_id:
+        raise PermissionError("Отказано в доступе: Можно удалять только свой аккаунт")  # контроль доступа
+
     user = get_user_by_id(db, user_id)
     if user is None:
         return False
@@ -40,7 +56,15 @@ def delete_user(db: Session, user_id: int) -> bool:
     return True
 
 # CRUD для tags
-def create_tag(db: Session, name: str): # -> tag
+def create_tag(db: Session, name: str, author_id: int): # -> tag
+    # проверяем права пользователя
+    user = get_user_by_id(db, author_id)
+    if not user:
+        raise ValueError("Ошибка: Пользователь с таким ID не найден")
+
+    if user.role != UserRole.admin:
+        raise PermissionError("Отказано в доступе: Только администраторы могут создавать теги")  # контроль доступа
+
     new_tag = Tag(name = name)  # имя в поле таблицы
 
     try:
@@ -61,7 +85,15 @@ def get_tag_by_name(db: Session, name: str): # -> tag | none
 def get_all_tags(db: Session): # -> list[Tag]
     return db.scalars(select(Tag)).all()
 
-def delete_tag(db: Session, tag_id: int) -> bool:
+def delete_tag(db: Session, tag_id: int, author_id: int) -> bool:
+    # проверяем права пользователя
+    user = get_user_by_id(db, author_id)
+    if not user:
+        raise ValueError("Ошибка: Пользователь с таким ID не найден")
+
+    if user.role != UserRole.admin:
+        raise PermissionError("Отказано в доступе: Только администраторы могут удалять теги")  # контроль доступа
+
     tag = get_tag_by_id(db, tag_id)
     if tag:
         db.delete(tag)
@@ -110,7 +142,15 @@ def get_all_posts(db: Session): # -> list[post]
 def get_published_posts(db: Session): # -> list[post]
     return db.scalars(select(Post).where(Post.is_published.is_(True)).order_by(Post.id)).all()
 
-def update_post_title(db: Session, post_id: int, new_title: str): # -> post | none
+def update_post_title(db: Session, post_id: int, new_title: str, author_id: int): # -> post | none
+    # проверяем права пользователя
+    user = get_user_by_id(db, author_id)
+    if not user:
+        raise ValueError("Ошибка: Пользователь с таким ID не найден")
+
+    if user.role != UserRole.admin:
+        raise PermissionError("Отказано в доступе: Только администраторы могут изменять публикации") # контроль доступа
+
     post = get_post_by_id(db, post_id)
     if post is None:
         return None
@@ -120,16 +160,33 @@ def update_post_title(db: Session, post_id: int, new_title: str): # -> post | no
     db.refresh(post)
     return post
 
-def update_post_status(db: Session, post_id: int, is_published: bool): # -> post | none
-    post = get_post_by_id(db, post_id)
-    if post:
-        post.is_published = is_published
-        db.commit()
-        db.refresh(post)
-        return post
-    return None
+def update_post_status(db: Session, post_id: int, is_published: bool, author_id: int): # -> post | none
+    # проверяем права пользователя
+    user = get_user_by_id(db, author_id)
+    if not user:
+        raise ValueError("Ошибка: Пользователь с таким ID не найден")
 
-def delete_post(db: Session, post_id: int) -> bool:
+    if user.role != UserRole.admin:
+        raise PermissionError("Отказано в доступе: Только администраторы могут менять статус публикации") # контроль доступа
+
+    post = get_post_by_id(db, post_id)
+    if post is None:
+        return None
+
+    post.is_published = is_published
+    db.commit()
+    db.refresh(post)
+    return post
+
+def delete_post(db: Session, post_id: int, author_id: int) -> bool:
+    # проверяем права пользователя
+    user = get_user_by_id(db, author_id)
+    if not user:
+        raise ValueError("Ошибка: Пользователь с таким ID не найден")
+
+    if user.role != UserRole.admin:
+        raise PermissionError("Отказано в доступе: Только администраторы могут удалять публикации") # контроль доступа
+
     post = get_post_by_id(db, post_id)
     if post is None:
         return False
