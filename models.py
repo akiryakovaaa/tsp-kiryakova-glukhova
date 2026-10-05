@@ -12,12 +12,13 @@ from sqlalchemy import (
     Table
 )
 
-from sqlalchemy.orm import relationship, Mapped, mapped_column # связи таблиц (М:М, 1:1) и типизация колонок
+from sqlalchemy.orm import DeclarativeBase, relationship, Mapped, mapped_column # связи таблиц (М:М, 1:1) и типизация колонок
 from sqlalchemy.sql import func # фиксация времени сервером
 from typing import List, Optional # List для множественных связей, Optional для полей, допускающих NULL
 from datetime import datetime # тип данных для хранения даты и времени
 
-from database import Base
+class Base(DeclarativeBase):
+    pass
 
 class UserRole(enum.Enum):
     user = "user"
