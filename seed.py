@@ -1,6 +1,7 @@
 from database import SessionLocal
 from crud import create_user, create_post, create_tag, get_tag_by_name, add_post_to_favorites
 from models import User, Post, PostType, UserRole
+from sqlalchemy import select
 
 def seed_data():
     db = SessionLocal()
@@ -8,13 +9,13 @@ def seed_data():
         print("Начинаем заполнение базы данных")
 
         # 1 - создание пользователей
-        user_anna = db.query(User).filter(User.email == "anna@example.com").first()
+        user_anna = db.scalar(select(User).where(User.email == "anna@example.com"))
         if not user_anna:
             user_anna = create_user(db=db, username="anna", email="anna@example.com",
                                     password_hash="hash1", role=UserRole.admin)
             print("Создан admin: anna")
 
-        user_julia = db.query(User).filter(User.email == "julia@example.com").first()
+        user_julia = db.scalar(select(User).where(User.email == "julia@example.com"))
         if not user_julia:
             user_julia = create_user(db=db, username="julia", email="julia@example.com",
                                     password_hash="hash2", role=UserRole.admin)
@@ -31,7 +32,7 @@ def seed_data():
         print("Кулинарные теги инициализированы")
 
         # 3 - создание публикаций
-        post_recipe = db.query(Post).filter(Post.title == "Домашний борщ").first()
+        post_recipe = db.scalar(select(Post).where(Post.title == "Домашний борщ"))
         if not post_recipe:
             post_recipe = create_post(
                 db = db,
@@ -45,7 +46,7 @@ def seed_data():
             )
             print("Создан пост: 'Домашний борщ'")
 
-        post_steak = db.query(Post).filter(Post.title == "Секреты идеального стейка").first()
+        post_steak = db.scalar(select(Post).where(Post.title == "Секреты идеального стейка"))
         if not post_steak:
             post_steak = create_post(
                 db = db,
@@ -59,7 +60,7 @@ def seed_data():
             )
             print("Создан пост: 'Секреты идеального стейка'")
 
-        post_dessert = db.query(Post).filter(Post.title == "Пышные сырники").first()
+        post_dessert = db.scalar(select(Post).where(Post.title == "Пышные сырники"))
         if not post_dessert:
             post_dessert = create_post(
                 db = db,
