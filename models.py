@@ -46,8 +46,7 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.user)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
-    favorites: Mapped[List["Favorite"]] = relationship(back_populates="user", cascade="all, delete-orphan")
-    posts: Mapped[List["Post"]] = relationship(back_populates="author", cascade="all, delete-orphan")
+    favorites: Mapped[List["Favorite"]] = relationship(back_populates="user")
 
 class Post(Base):
     __tablename__ = "posts"
@@ -58,12 +57,11 @@ class Post(Base):
     body: Mapped[str] = mapped_column(Text)
     post_type: Mapped[PostType] = mapped_column(Enum(PostType))
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    author: Mapped["User"] = relationship(back_populates="posts")
     is_published: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, onupdate=func.now())
 
-    favorites: Mapped[List["Favorite"]] = relationship(back_populates="post", cascade="all, delete-orphan") # у одного поста может быть много добавлений в избранное
+    favorites: Mapped[List["Favorite"]] = relationship(back_populates="post") # у одного поста может быть много добавлений в избранное
     tags: Mapped[List["Tag"]] = relationship(secondary=post_tags, back_populates="posts") # у поста много тегов, один тег может принадлежать множеству постов
 
 class Favorite(Base):
