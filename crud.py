@@ -3,16 +3,26 @@ from sqlalchemy.exc import IntegrityError # ошибка - нарушения о
 from sqlalchemy import select
 
 from models import User, Post, Favorite, Tag, UserRole, PostType
+import hashlib
+import schemas
 
 # CRUD для users
-def create_user(db: Session, username: str, email: str,
-                password_hash: str, role: UserRole = UserRole.user):
+def create_user(db: Session, user: schemas.UserCreate):
+    # базовое хеширование пароля без внешних библиотек
+    hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
 
-    user = User(username = username, email = email, password_hash = password_hash, role = role)
-    db.add(user)  # добавляем объект в сессию
-    db.commit()  # сохраняем изменения в бд
-    db.refresh(user)  # обновляем объект данными из базы (id)
-    return user
+    db_user = User(
+        username=user.username,
+        email=user.email,
+        password_hash=hashed_password
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def get_user_by_username(db: Session, username: str):
+    return db.query(User).filter(User.username == username).first()
 
 def get_user_by_id(db: Session, user_id: int): # -> user | none
     return db.get(User, user_id)# строки, где id совпадает с переданным
