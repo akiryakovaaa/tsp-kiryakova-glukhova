@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import Optional
-from datetime import datetime
 from models import PostType, UserRole
 
 # входная схема для регистрации нового пользователя (POST /users/register).
