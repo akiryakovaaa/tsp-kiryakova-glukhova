@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package recommendations;
+
+service SimilarityService {
+  rpc GetSimilarPosts (PostRequest) returns (PostListResponse) {}
+}
+
+message PostRequest {
+  int32 post_id = 1;
+  repeated string tags = 2;
+}
+
+message SimilarPost {
+  int32 id = 1;
+  string title = 2;
+}
+
+message PostListResponse {
+  repeated SimilarPost posts = 1;
+}
