@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker # инструменты ORM: создание сессий
+
 from models import Base
 
 SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://anna@localhost:5432/Culinary_news_portal"
@@ -16,3 +17,11 @@ SessionLocal = sessionmaker(
 # автоматическое создание всех таблиц в базе данных
 def init_db():
     Base.metadata.create_all(bind=engine)
+
+# генератор сессии БД
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db # сессия для каждого запроса
+    finally:
+        db.close()
