@@ -25,7 +25,7 @@ class PostCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     body: str = Field(..., min_length=1)
     description: Optional[str] = None
-    post_type: PostType = PostType.recipe
+    post_type: PostType
     is_published: bool = False
     tag_ids: Optional[list[int]] = None
 

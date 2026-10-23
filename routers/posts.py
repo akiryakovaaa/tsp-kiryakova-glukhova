@@ -5,16 +5,22 @@ import crud
 import schemas
 from database import get_db
 
-router = APIRouter(prefix="/posts", tags=["Posts"])
+router = APIRouter(prefix="/posts", tags=["Posts"])  # локальный роутер модуля
 
 # создание публикации
 @router.post("/", response_model=schemas.PostResponse, status_code=status.HTTP_201_CREATED)
 def create_post(post: schemas.PostCreate, author_id: int, db: Session = Depends(get_db)):
-    new_post = crud.create_post(
-        db=db,
-        post=post,
-        author_id=author_id
-    )
+    try:
+        new_post = crud.create_post(
+            db=db,
+            post=post,
+            author_id=author_id
+        )
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
     if not new_post:
         raise HTTPException(status_code=400, detail="Не удалось создать пост") # 400 bad request
     return new_post

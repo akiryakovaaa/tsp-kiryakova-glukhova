@@ -6,7 +6,7 @@ import crud
 import schemas
 from database import get_db
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix="/users", tags=["Users"])  # локальный роутер модуля
 
 # регистрация пользователя
 @router.post("/register", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)

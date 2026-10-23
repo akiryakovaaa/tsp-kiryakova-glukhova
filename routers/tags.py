@@ -5,7 +5,7 @@ import crud
 import schemas
 from database import get_db
 
-router = APIRouter(prefix="/tags", tags=["Tags"])
+router = APIRouter(prefix="/tags", tags=["Tags"])  # локальный роутер модуля
 
 # создание нового тега
 @router.post("/", response_model=schemas.TagResponse, status_code=status.HTTP_201_CREATED)
