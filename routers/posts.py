@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 import crud
 import schemas
 from database import get_db
+from grpc_client import get_similar_posts
 
 router = APIRouter(prefix="/posts", tags=["Posts"])  # локальный роутер модуля
 
@@ -31,12 +32,27 @@ def get_posts(db: Session = Depends(get_db)):
     return crud.get_all_posts(db)
 
 # получение публикации по ID
-@router.get("/{post_id}", response_model=schemas.PostResponse)
+@router.get("/{post_id}")
 def get_post(post_id: int, db: Session = Depends(get_db)):
     post = crud.get_post_by_id(db, post_id)
+
     if post is None:
-        raise HTTPException(status_code=404, detail="Пост не найден") # 404 not found
-    return post
+        raise HTTPException(status_code=404, detail="Пост не найден")
+
+    tags = [tag.name for tag in post.tags]
+
+    try:
+        similar_posts = get_similar_posts(post.id, tags)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Сервис похожих публикаций недоступен: {exc}"
+        )
+
+    return {
+        "post": schemas.PostResponse.model_validate(post),
+        "similar_posts": similar_posts
+    }
 
 # удаление публикации
 @router.delete("/{post_id}")
