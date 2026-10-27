@@ -17,10 +17,10 @@ except ImportError:
 
 if _version_not_supported:
     raise RuntimeError(
-        f'The grpc package installed is at version {GRPC_VERSION},'
+        f'The grpc_service package installed is at version {GRPC_VERSION},'
         + ' but the generated code in service_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
-        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
+        + f' Please upgrade your grpc_service module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
@@ -32,7 +32,7 @@ class SimilarityServiceStub:
         """Constructor.
 
         Args:
-            channel: A grpc.Channel.
+            channel: A grpc_service.Channel.
         """
         self.GetSimilarPosts = channel.unary_unary(
                 '/recommendations.SimilarityService/GetSimilarPosts',

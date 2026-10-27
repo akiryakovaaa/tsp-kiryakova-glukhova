@@ -19,10 +19,4 @@ def get_similar_posts(post_id: int, tags: list[str]):
         response = stub.GetSimilarPosts(request)
 
         # преобразуем ответ в список словарей для FastAPI
-        return [
-            {
-                "id": post.id,
-                "title": post.title
-            }
-            for post in response.posts
-        ]
+        return [{"id": post.id, "title": post.title} for post in response.posts]

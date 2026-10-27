@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 import crud
 import schemas
 from database import get_db
-from grpc_client import get_similar_posts
+from grpc_service.client import get_similar_posts
 
 router = APIRouter(prefix="/posts", tags=["Posts"])  # локальный роутер модуля
 

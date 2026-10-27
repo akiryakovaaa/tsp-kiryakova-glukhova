@@ -1,21 +1,25 @@
-syntax = "proto3";
+syntax = "proto3"; // версия синтаксиса Protocol Buffers
 
-package recommendations;
+package recommendations; // пространство имен)
 
+// микросервис
 service SimilarityService {
-  rpc GetSimilarPosts (PostRequest) returns (PostListResponse) {}
+  rpc GetSimilarPosts (PostRequest) returns (PostListResponse) {}   // сетевая функция
 }
 
+// входящие данные от клиента
 message PostRequest {
   int32 post_id = 1;
   repeated string tags = 2;
 }
 
+// найденные похожие посты
 message SimilarPost {
   int32 id = 1;
   string title = 2;
 }
 
+// ответ для клиента
 message PostListResponse {
   repeated SimilarPost posts = 1;
 }

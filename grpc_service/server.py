@@ -4,14 +4,13 @@ import grpc
 from concurrent import futures
 
 # добавляем пути к папкам с файлами проекта
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../protos')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../protos'))) # папка \protos
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) # папка \tsp-kiryakova-glukhova
 
 import service_pb2
 import service_pb2_grpc
 from database import SessionLocal
 import crud
-
 
 # класс обрабатывает запросы от gRPC-клиента
 class SimilarityServiceServicer(service_pb2_grpc.SimilarityServiceServicer):
@@ -47,10 +46,8 @@ class SimilarityServiceServicer(service_pb2_grpc.SimilarityServiceServicer):
                 if candidate.id == post.id:
                     continue
 
-                # получаем теги текущей публикации в том же формате
-                candidate_tags = {
-                    tag.name.lower() for tag in candidate.tags
-                }
+                # получаем теги текущей публикации в множестве
+                candidate_tags = {tag.name.lower() for tag in candidate.tags}
 
                 # находим общие теги двух публикаций
                 common_tags = tag_names & candidate_tags
@@ -61,9 +58,7 @@ class SimilarityServiceServicer(service_pb2_grpc.SimilarityServiceServicer):
 
             # сначала показываем публикации с большим числом общих тегов
             # при равном количестве общих тегов раньше идет публикация с меньшим id
-            similar_posts.sort(
-                key=lambda item: (-item[1], item[0].id)
-            )
+            similar_posts.sort(key=lambda item: (-item[1], item[0].id))
 
             # добавляем в ответ не более пяти похожих публикаций
             for candidate, _ in similar_posts[:5]:
