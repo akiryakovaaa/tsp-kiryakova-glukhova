@@ -4,7 +4,7 @@ package recommendations; // пространство имен)
 
 // микросервис
 service SimilarityService {
-  rpc GetSimilarPosts (PostRequest) returns (PostListResponse) {}   // сетевая функция
+    rpc GetSimilarPosts (PostRequest) returns (PostListResponse) {}
 }
 
 // входящие данные от клиента

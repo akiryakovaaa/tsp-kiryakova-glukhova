@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from protos import service_pb2 as service__pb2
+from protos import service_pb2 as protos_dot_service__pb2
 
 GRPC_GENERATED_VERSION = '1.84.1'
 GRPC_VERSION = grpc.__version__
@@ -17,32 +17,34 @@ except ImportError:
 
 if _version_not_supported:
     raise RuntimeError(
-        f'The grpc_service package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in service_pb2_grpc.py depends on'
+        f'The grpc package installed is at version {GRPC_VERSION},'
+        + ' but the generated code in protos/service_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
-        + f' Please upgrade your grpc_service module to grpcio>={GRPC_GENERATED_VERSION}'
+        + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
 class SimilarityServiceStub:
-    """Missing associated documentation comment in .proto file."""
+    """микросервис
+    """
 
     def __init__(self, channel):
         """Constructor.
 
         Args:
-            channel: A grpc_service.Channel.
+            channel: A grpc.Channel.
         """
         self.GetSimilarPosts = channel.unary_unary(
                 '/recommendations.SimilarityService/GetSimilarPosts',
-                request_serializer=service__pb2.PostRequest.SerializeToString,
-                response_deserializer=service__pb2.PostListResponse.FromString,
+                request_serializer=protos_dot_service__pb2.PostRequest.SerializeToString,
+                response_deserializer=protos_dot_service__pb2.PostListResponse.FromString,
                 _registered_method=True)
 
 
 class SimilarityServiceServicer:
-    """Missing associated documentation comment in .proto file."""
+    """микросервис
+    """
 
     def GetSimilarPosts(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -55,8 +57,8 @@ def add_SimilarityServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GetSimilarPosts': grpc.unary_unary_rpc_method_handler(
                     servicer.GetSimilarPosts,
-                    request_deserializer=service__pb2.PostRequest.FromString,
-                    response_serializer=service__pb2.PostListResponse.SerializeToString,
+                    request_deserializer=protos_dot_service__pb2.PostRequest.FromString,
+                    response_serializer=protos_dot_service__pb2.PostListResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -67,7 +69,8 @@ def add_SimilarityServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class SimilarityService:
-    """Missing associated documentation comment in .proto file."""
+    """микросервис
+    """
 
     @staticmethod
     def GetSimilarPosts(request,
@@ -84,8 +87,8 @@ class SimilarityService:
             request,
             target,
             '/recommendations.SimilarityService/GetSimilarPosts',
-            service__pb2.PostRequest.SerializeToString,
-            service__pb2.PostListResponse.FromString,
+            protos_dot_service__pb2.PostRequest.SerializeToString,
+            protos_dot_service__pb2.PostListResponse.FromString,
             options,
             channel_credentials,
             insecure,
