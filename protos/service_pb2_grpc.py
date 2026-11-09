@@ -38,7 +38,7 @@ class SimilarityServiceStub:
         self.GetSimilarPosts = channel.unary_unary(
                 '/recommendations.SimilarityService/GetSimilarPosts',
                 request_serializer=protos_dot_service__pb2.PostRequest.SerializeToString,
-                response_deserializer=protos_dot_service__pb2.PostListResponse.FromString,
+                response_deserializer=protos_dot_service__pb2.SimilarPost.FromString,
                 _registered_method=True)
 
 
@@ -58,7 +58,7 @@ def add_SimilarityServiceServicer_to_server(servicer, server):
             'GetSimilarPosts': grpc.unary_unary_rpc_method_handler(
                     servicer.GetSimilarPosts,
                     request_deserializer=protos_dot_service__pb2.PostRequest.FromString,
-                    response_serializer=protos_dot_service__pb2.PostListResponse.SerializeToString,
+                    response_serializer=protos_dot_service__pb2.SimilarPost.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -88,7 +88,7 @@ class SimilarityService:
             target,
             '/recommendations.SimilarityService/GetSimilarPosts',
             protos_dot_service__pb2.PostRequest.SerializeToString,
-            protos_dot_service__pb2.PostListResponse.FromString,
+            protos_dot_service__pb2.SimilarPost.FromString,
             options,
             channel_credentials,
             insecure,
