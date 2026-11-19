@@ -5,6 +5,7 @@ import crud
 import schemas
 from database import get_db
 from grpc_service.client import get_similar_posts
+from broker.producer import publish_event
 
 router = APIRouter(prefix="/posts", tags=["Posts"])  # локальный роутер модуля
 
@@ -24,6 +25,16 @@ def create_post(post: schemas.PostCreate, author_id: int, db: Session = Depends(
 
     if not new_post:
         raise HTTPException(status_code=400, detail="Не удалось создать пост") # 400 bad request
+
+    publish_event(
+        event_type="post_created",
+        payload={
+            "post_id": new_post.id,
+            "title": new_post.title,
+            "author_id": author_id,
+        }
+    )
+
     return new_post
 
 # получение списка публикаций
