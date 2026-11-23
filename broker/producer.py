@@ -1,31 +1,31 @@
-import pika
+import pickle  # python-словарь -> байты
+import pika  # протокол AMQP и общение с RabbitMQ
 from broker.config import RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_QUEUE
-import pickle
 
 
+# отправляем сериализованное Python-событие в очередь RabbitMQ
 def publish_event(event_type: str, payload: dict):
-    """Отправляет сериализованное Python-событие в очередь RabbitMQ."""
     message = {
         "event": event_type,
         **payload
     }
 
     try:
-        # открываем TCP-соединение и виртуальный канал (как в лекции)
+        # устанавливаем синхронное TCP-соединение
         connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT)
+            pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT)  # передаём адрес и порт брокера
         )
-        channel = connection.channel()
+        channel = connection.channel()  # открываем AMQP-канал
 
-        # объявляем устойчивую очередь (durable=True)
+        # объявляем очередь
         channel.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
 
-        # публикуем сообщение через default exchange (exchange="")
+        # публикуем сообщение
         channel.basic_publish(
-            exchange="",
+            exchange="",  # обменник default exchange (тип Direct)
             routing_key=RABBITMQ_QUEUE,
             body=pickle.dumps(message),
-            properties=pika.BasicProperties(
+            properties=pika.BasicProperties(  # метаданные
                 content_type="application/python-pickle",
                 delivery_mode=pika.DeliveryMode.Persistent,  # сохранять на диск
             ),
@@ -34,5 +34,4 @@ def publish_event(event_type: str, payload: dict):
         connection.close()
 
     except Exception as exc:
-        # если брокер недоступен, FastAPI не должен падать
         print(f"[RabbitMQ] Ошибка отправки сообщения: {exc}")

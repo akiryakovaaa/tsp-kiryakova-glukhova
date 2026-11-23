@@ -1,7 +1,5 @@
-
 import asyncio
 import websockets
-
 
 # подключение к websocket-серверу
 async def connect_to_server():
@@ -10,6 +8,7 @@ async def connect_to_server():
     print("[Client] Подключение к серверу...")
 
     try:
+        # подключаемся к WebSocket-серверу (рукопожатие)
         async with websockets.connect(uri) as websocket:
             print("[Client] Успешное подключение")
             print("[Client] Ожидание уведомлений...\n")
@@ -20,7 +19,6 @@ async def connect_to_server():
 
     except Exception as exc:
         print(f"[Client] Ошибка подключения: {exc}")
-
 
 if __name__ == "__main__":
     asyncio.run(connect_to_server())
