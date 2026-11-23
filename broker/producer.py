@@ -1,10 +1,10 @@
-import json
 import pika
 from broker.config import RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_QUEUE
+import pickle
 
 
 def publish_event(event_type: str, payload: dict):
-    """Отправляет JSON-событие в очередь RabbitMQ."""
+    """Отправляет сериализованное Python-событие в очередь RabbitMQ."""
     message = {
         "event": event_type,
         **payload
@@ -24,9 +24,9 @@ def publish_event(event_type: str, payload: dict):
         channel.basic_publish(
             exchange="",
             routing_key=RABBITMQ_QUEUE,
-            body=json.dumps(message, ensure_ascii=False).encode("utf-8"),
+            body=pickle.dumps(message),
             properties=pika.BasicProperties(
-                content_type="application/json",
+                content_type="application/python-pickle",
                 delivery_mode=pika.DeliveryMode.Persistent,  # сохранять на диск
             ),
         )

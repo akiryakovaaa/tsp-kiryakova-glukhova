@@ -1,8 +1,8 @@
 
 import asyncio
-import json
 import aio_pika
 import websockets
+import pickle
 
 from broker.config import (
     RABBITMQ_HOST,
@@ -44,7 +44,7 @@ async def broadcast_notification(message: str):
 # обработка сообщений из RabbitMQ
 async def process_message(message: aio_pika.IncomingMessage):
     async with message.process():
-        event = json.loads(message.body.decode("utf-8"))
+        event = pickle.loads(message.body)
 
         print(f"[RabbitMQ] Получено событие: {event}")
 
