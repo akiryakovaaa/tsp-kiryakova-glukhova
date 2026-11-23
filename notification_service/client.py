@@ -5,7 +5,7 @@ import websockets
 
 # подключение к websocket-серверу
 async def connect_to_server():
-    uri = "ws://localhost:8001/ws"
+    uri = "ws://127.0.0.1:8001"
 
     print("[Client] Подключение к серверу...")
 

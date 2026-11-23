@@ -2,9 +2,7 @@
 import asyncio
 import json
 import aio_pika
-
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-import uvicorn
+import websockets
 
 from broker.config import (
     RABBITMQ_HOST,
@@ -12,25 +10,20 @@ from broker.config import (
     RABBITMQ_QUEUE
 )
 
-app = FastAPI()
-
 # храним активные подключения клиентов
 active_connections = set()
 
 
 # подключение клиента к websocket
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
+async def websocket_handler(websocket):
     active_connections.add(websocket)
 
     print("[WebSocket] Клиент подключился")
 
     try:
-        while True:
-            await websocket.receive_text()
+        await websocket.wait_closed()
 
-    except WebSocketDisconnect:
+    finally:
         active_connections.remove(websocket)
         print("[WebSocket] Клиент отключился")
 
@@ -39,9 +32,9 @@ async def websocket_endpoint(websocket: WebSocket):
 async def broadcast_notification(message: str):
     disconnected = set()
 
-    for websocket in active_connections:
+    for websocket in active_connections.copy():
         try:
-            await websocket.send_text(message)
+            await websocket.send(message)
         except Exception:
             disconnected.add(websocket)
 
@@ -91,29 +84,16 @@ async def consume_messages():
 
 # запуск notification service
 async def start_service():
-    # запускаем websocket-сервер
-    config = uvicorn.Config(
-        app,
-        host="127.0.0.1",
-        port=8001,
-        log_level="info"
-    )
+    async with websockets.serve(
+        websocket_handler,
+        "127.0.0.1",
+        8001
+    ):
+        print("[Notification Service] Сервис запущен")
+        print("[WebSocket] Сервер доступен по адресу ws://localhost:8001")
 
-    server = uvicorn.Server(config)
-
-    # запускаем websocket и rabbitmq одновременно
-    websocket_task = asyncio.create_task(server.serve())
-    rabbitmq_task = asyncio.create_task(consume_messages())
-
-    print("[Notification Service] Сервис запущен")
-    print("[WebSocket] Сервер доступен по адресу ws://localhost:8001/ws")
-
-    try:
-        await asyncio.gather(websocket_task, rabbitmq_task)
-    except asyncio.CancelledError:
-        print("[Notification Service] Завершение работы")
+        await consume_messages()
 
 
 if __name__ == "__main__":
     asyncio.run(start_service())
-
