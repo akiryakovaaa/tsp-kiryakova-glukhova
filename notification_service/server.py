@@ -4,12 +4,13 @@ import aio_pika  # подключение к RabbitMQ по протоколу AM
 import websockets
 from broker.config import RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_QUEUE
 
-# храним активные подключения клиентов
-active_connections = set()
+active_connections = set() # храним активные подключения клиентов
+clients_available = asyncio.Event() # флаг синхронизации
 
 # подключение клиента к websocket
 async def websocket_handler(websocket):
     active_connections.add(websocket)
+    clients_available.set()
     print("[WebSocket] Клиент подключился")
 
     try:
@@ -17,6 +18,10 @@ async def websocket_handler(websocket):
 
     finally:
         active_connections.discard(websocket)  # безопасно удаляем отключившегося клиента
+
+        if not active_connections:
+            clients_available.clear()
+
         print("[WebSocket] Клиент отключился")
 
 # рассылка уведомления всем подключённым клиентам
@@ -31,22 +36,25 @@ async def broadcast_notification(message: str):
 
     active_connections.difference_update(disconnected)
 
+    if not active_connections:
+        clients_available.clear()
+
 # обработка сообщений из RabbitMQ
 async def process_message(message: aio_pika.IncomingMessage):
-    async with message.process():
-        event = pickle.loads(message.body)
+    event = pickle.loads(message.body)
+    print(f"[RabbitMQ] Получено событие: {event}")
 
-        print(f"[RabbitMQ] Получено событие: {event}")
+    if event.get("event") == "post_created":
+        notification = (
+            f"Новая публикация: {event.get('title')}, "
+            f"ID: {event.get('post_id')}"
+        )
+    else:
+        notification = f"Новое событие: {event}"
 
-        if event.get("event") == "new_post":
-            notification = (
-                f"Новая публикация: {event.get('title')}, "
-                f"ID: {event.get('post_id')}"
-            )
-        else:
-            notification = f"Новое событие: {event}"
-
-        await broadcast_notification(notification)
+    await clients_available.wait()
+    await broadcast_notification(notification)
+    await message.ack()
 
 # подключение к RabbitMQ и получение сообщений
 async def consume_messages():
