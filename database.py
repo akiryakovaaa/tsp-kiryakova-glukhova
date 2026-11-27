@@ -1,9 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker # инструменты ORM: создание сессий
-
+import os
 from models import Base
 
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://anna@localhost:5432/Culinary_news_portal"
+SQLALCHEMY_DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg2://anna@localhost:5432/Culinary_news_portal"
+)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 

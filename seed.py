@@ -1,6 +1,7 @@
 from database import SessionLocal
 from crud import create_user, create_post, create_tag, get_tag_by_name, add_post_to_favorites
 from models import User, Post, PostType, UserRole
+import schemas
 
 from sqlalchemy import select
 

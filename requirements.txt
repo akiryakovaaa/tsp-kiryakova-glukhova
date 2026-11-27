@@ -1,0 +1,26 @@
+# API Service — веб-приложение и ASGI-сервер
+fastapi==0.143.3
+uvicorn==0.54.0
+
+# Работа с базой данных PostgreSQL
+SQLAlchemy==2.0.54
+psycopg2-binary==2.9.13
+
+# Валидация данных
+pydantic==2.14.1
+email-validator==2.3.0
+
+# gRPC Service — удаленный вызов процедур
+grpcio==1.85.1
+grpcio-tools==1.85.1
+protobuf==7.36.2
+
+# RabbitMQ — обмен сообщениями между сервисами
+pika==1.5.0
+aio-pika==10.2.3
+
+# Notification Service — WebSocket-соединения
+websockets==17.2
+
+# Работа с переменными окружения
+python-dotenv==1.2.4

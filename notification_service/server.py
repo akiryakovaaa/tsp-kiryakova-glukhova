@@ -2,7 +2,13 @@ import asyncio  # запуск WebSocket и RabbitMQ
 import pickle  # байты -> python-словарь
 import aio_pika  # подключение к RabbitMQ по протоколу AMQP
 import websockets
-from broker.config import RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_QUEUE
+from broker.config import (
+    RABBITMQ_HOST,
+    RABBITMQ_PORT,
+    RABBITMQ_QUEUE,
+    RABBITMQ_USER,
+    RABBITMQ_PASSWORD
+)
 
 active_connections = set() # храним активные подключения клиентов
 clients_available = asyncio.Event() # флаг синхронизации
@@ -59,7 +65,13 @@ async def process_message(message: aio_pika.IncomingMessage):
 # подключение к RabbitMQ и получение сообщений
 async def consume_messages():
     # открываем асинхронное TCP-соединение с RabbitMQ
-    connection = await aio_pika.connect_robust(host=RABBITMQ_HOST, port=RABBITMQ_PORT)
+    # параметры подключения получаем из переменных окружения
+    connection = await aio_pika.connect_robust(
+        host=RABBITMQ_HOST,  # имя сервиса в сети Docker
+        port=RABBITMQ_PORT,  # порт брокера сообщений
+        login=RABBITMQ_USER,  # имя пользователя
+        password=RABBITMQ_PASSWORD  # пароль пользователя
+    )
 
     channel = await connection.channel()
     queue = await channel.declare_queue(RABBITMQ_QUEUE, durable=True)
@@ -74,7 +86,7 @@ async def consume_messages():
 # запуск notification service
 async def start_service():
     # открываем слушающий сокет
-    async with websockets.serve(websocket_handler, "127.0.0.1", 8001):
+    async with websockets.serve(websocket_handler, "0.0.0.0", 8001):
         print("[Notification Service] Сервис запущен")
         print("[WebSocket] Сервер доступен по адресу ws://127.0.0.1:8001")
 

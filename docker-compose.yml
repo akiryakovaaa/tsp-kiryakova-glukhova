@@ -1,0 +1,110 @@
+# имя проекта Docker Compose
+name: culinary-portal-lab5
+
+services:
+
+  # сервис базы данных PostgreSQL
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-anna}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-Culinary_news_portal}
+    volumes:
+      # том для постоянного хранения данных БД
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      # проверка готовности БД
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # брокер сообщений RabbitMQ
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-app}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD}
+    ports:
+      - "127.0.0.1:15672:15672"
+    networks:
+      - app-network
+    healthcheck:
+      # проверка готовности портов брокера сообщений
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # сервис удаленного вызова процедур gRPC
+  grpc-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.grpc
+    depends_on:
+      # ждем, пока БД станет healthy
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${DB_USERNAME:-anna}:${DB_PASSWORD}@db:5432/${DB_NAME:-Culinary_news_portal}
+    networks:
+      - app-network
+
+  # основной сервис REST API
+  api-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    depends_on:
+      # ждем готовности зависимых сервисов
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      grpc-service:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${DB_USERNAME:-anna}:${DB_PASSWORD}@db:5432/${DB_NAME:-Culinary_news_portal}
+      GRPC_HOST: grpc-service
+      GRPC_PORT: 50051
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_QUEUE: notifications_queue
+      RABBITMQ_USER: ${RABBITMQ_USER:-app}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+
+  # сервис отправки уведомлений через WebSocket
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.notification
+    depends_on:
+      # ждем, пока брокер сообщений станет healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_QUEUE: notifications_queue
+      RABBITMQ_USER: ${RABBITMQ_USER:-app}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+    ports:
+      - "8001:8001"
+    networks:
+      - app-network
+
+# именованный том для хранения данных
+volumes:
+  postgres_data:
+
+# общая сеть для взаимодействия контейнеров
+networks:
+  app-network:
+    driver: bridge

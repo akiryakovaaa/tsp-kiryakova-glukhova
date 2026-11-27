@@ -8,10 +8,14 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../p
 import service_pb2
 import service_pb2_grpc
 
+# адрес подключения к gRPC-серверу
+GRPC_HOST = os.getenv("GRPC_HOST", "localhost")
+GRPC_PORT = os.getenv("GRPC_PORT", "50051")
+
 
 def get_similar_posts(post_id: int, tags: list[str]):
     # открываем канал для подключения к gRPC-серверу
-    with grpc.insecure_channel("localhost:50051") as channel:
+    with grpc.insecure_channel(f"{GRPC_HOST}:{GRPC_PORT}") as channel:
         # создаем клиент для вызова метода gRPC-сервиса
         stub = service_pb2_grpc.SimilarityServiceStub(channel)
 

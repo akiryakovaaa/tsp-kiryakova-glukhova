@@ -1,6 +1,12 @@
 import pickle  # python-словарь -> байты
 import pika  # протокол AMQP и общение с RabbitMQ
-from broker.config import RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_QUEUE
+from broker.config import (
+    RABBITMQ_HOST,
+    RABBITMQ_PORT,
+    RABBITMQ_QUEUE,
+    RABBITMQ_USER,
+    RABBITMQ_PASSWORD
+)
 
 
 # отправляем сериализованное Python-событие в очередь RabbitMQ
@@ -11,9 +17,19 @@ def publish_event(event_type: str, payload: dict):
     }
 
     try:
-        # устанавливаем синхронное TCP-соединение
+        # учетные данные для подключения к брокеру из переменных окружения
+        credentials = pika.PlainCredentials(
+            RABBITMQ_USER,
+            RABBITMQ_PASSWORD
+        )
+
+        # устанавливаем синхронное TCP-соединение с брокером сообщений
         connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT)  # передаём адрес и порт брокера
+            pika.ConnectionParameters(
+                host=RABBITMQ_HOST,  # имя сервиса в сети Docker
+                port=RABBITMQ_PORT,  # порт брокера сообщений
+                credentials=credentials  # параметры авторизации
+            )
         )
         channel = connection.channel()  # открываем AMQP-канал
 

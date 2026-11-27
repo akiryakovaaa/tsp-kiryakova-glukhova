@@ -1,0 +1,19 @@
+# базовый образ, от которого наследуем
+FROM python:3.13-slim
+
+# рабочая директория внутри контейнера
+WORKDIR /app
+
+# сначала зависимости (кэшируются)
+COPY requirements.txt .
+RUN pip install --no-cache-dir \
+    -r requirements.txt
+
+# затем код приложения
+COPY . .
+
+# документируем порт WebSocket-сервера
+EXPOSE 8001
+
+# команда, которая выполняется при запуске контейнера
+CMD ["python", "-m", "notification_service.server"]

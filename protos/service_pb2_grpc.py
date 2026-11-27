@@ -3,9 +3,9 @@
 import grpc
 import warnings
 
-from protos import service_pb2 as protos_dot_service__pb2
+import service_pb2 as service__pb2
 
-GRPC_GENERATED_VERSION = '1.84.1'
+GRPC_GENERATED_VERSION = '1.85.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -18,7 +18,7 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in protos/service_pb2_grpc.py depends on'
+        + ' but the generated code in service_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -37,8 +37,8 @@ class SimilarityServiceStub:
         """
         self.GetSimilarPosts = channel.unary_unary(
                 '/recommendations.SimilarityService/GetSimilarPosts',
-                request_serializer=protos_dot_service__pb2.PostRequest.SerializeToString,
-                response_deserializer=protos_dot_service__pb2.SimilarPost.FromString,
+                request_serializer=service__pb2.PostRequest.SerializeToString,
+                response_deserializer=service__pb2.PostListResponse.FromString,
                 _registered_method=True)
 
 
@@ -57,8 +57,8 @@ def add_SimilarityServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GetSimilarPosts': grpc.unary_unary_rpc_method_handler(
                     servicer.GetSimilarPosts,
-                    request_deserializer=protos_dot_service__pb2.PostRequest.FromString,
-                    response_serializer=protos_dot_service__pb2.SimilarPost.SerializeToString,
+                    request_deserializer=service__pb2.PostRequest.FromString,
+                    response_serializer=service__pb2.PostListResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -87,8 +87,8 @@ class SimilarityService:
             request,
             target,
             '/recommendations.SimilarityService/GetSimilarPosts',
-            protos_dot_service__pb2.PostRequest.SerializeToString,
-            protos_dot_service__pb2.SimilarPost.FromString,
+            service__pb2.PostRequest.SerializeToString,
+            service__pb2.PostListResponse.FromString,
             options,
             channel_credentials,
             insecure,
